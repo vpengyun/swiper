@@ -28,6 +28,12 @@ def send_verify_code(phone_num):
 
 
 def upload_file(filename, f):
+    '''
+    上传文件到本地
+    :param filename:
+    :param f:
+    :return:
+    '''
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
 
     with open(filepath, 'wb+') as output:
@@ -38,6 +44,12 @@ def upload_file(filename, f):
 
 
 def upload_qiniuyun(filename, filepath):
+    '''
+    上传文件到七牛云
+    :param filename:
+    :param filepath:
+    :return:
+    '''
     ret, info = qiniuyun.upload(filename, filepath)
 
     if info.status_code == 200:
@@ -47,6 +59,12 @@ def upload_qiniuyun(filename, filepath):
 
 @celery_app.task
 def async_upload_avatar(user, avatar):
+    '''
+    先把文件上传到本地，在再上传到云上
+    :param user:
+    :param avatar:
+    :return:
+    '''
     # 上传文件至本地服务器
     filename = 'avatar-%s-%d' % (user.id, int(time.time()))
     filepath = upload_file(filename, avatar)
@@ -55,6 +73,7 @@ def async_upload_avatar(user, avatar):
     ret = upload_qiniuyun(filename, filepath)
 
     if ret:
+        # 拼接用户头像路径,保存导数据库
         user.avatar = urljoin(config.QN_HOST, filename)
         user.save()
 

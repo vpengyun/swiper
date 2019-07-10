@@ -25,7 +25,7 @@ SECRET_KEY = 'e7^0i()td@gye8_lwn*n@^$(fhoyl@30fw=(i4a*wdo!1a1=o('
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'social',
+    'user',
+    'vip'
 ]
 
 MIDDLEWARE = [
@@ -103,18 +106,80 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# 日志配置
+LOGGING_DIR = os.path.join(BASE_DIR, 'logs')
+
+if not os.path.exists(LOGGING_DIR):
+    os.mkdir(LOGGING_DIR)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    # 格式配置
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s %(module)s.%(funcName)s: %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+        'verbose': {
+            'format': ('%(asctime)s %(levelname)s [%(process)d-%(threadName)s] '
+                       '%(module)s.%(funcName)s line %(lineno)d: %(message)s'),
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        }
+    },
+    # Handler 配置
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG' if DEBUG else 'WARNING'
+        },
+        'info': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': f'{BASE_DIR}/logs/info.log',  # 日志保存路径
+            'when': 'D',  # 每天切割日志
+            'backupCount': 30,  # 日志保留 30 天
+            'formatter': 'simple',
+            'level': 'DEBUG',
+        },
+        'error': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': f'{BASE_DIR}/logs/error.log',  # 日志保存路径
+            'when': 'W0',  # 每周一切割日志
+            'backupCount': 4,  # 日志保留 4 周
+            'formatter': 'verbose',
+            'level': 'WARNING',
+        }
+    },
+    # Logger 配置
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+        },
+        'inf': {
+            'handlers': ['info'],
+            'propagate': True,
+            'level': 'DEBUG' if DEBUG else 'INFO',
+        },
+        'err': {
+            'handlers': ['error'],
+            'propagate': True,
+            'level': 'WARNING',
+        }
+    }
+}

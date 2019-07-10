@@ -1,12 +1,19 @@
-from django.core import cache
-from django.shortcuts import render
+import logging
+import os
+import time
+from urllib.parse import urljoin
 
-# Create your views here.
+from django.conf import settings
+from django.core.cache import cache
+from django.http import JsonResponse
+
 from common import utils, errors, config
 from libs.http import render_json
 from user import logic
 from user.forms import ProfileForm
-from user.models import User
+from user.models import User, Profile
+
+logger = logging.getLogger('inf')
 
 
 def verify_phone(request):
@@ -17,20 +24,22 @@ def verify_phone(request):
     """
     phone_num = request.POST.get('phone_num', '')
     phone_num = phone_num.strip()
+
     if utils.is_phone_num(phone_num):
         if logic.send_verify_code(phone_num):
             return render_json()
         else:
-            return render_json(code=errors.SmsSendError)
+            return render_json(code=errors.SmsSendError.code)
+
     return render_json(code=errors.PhoneNumError.code)
 
 
 def login(request):
-    """
-    用户登录
+    '''
+    登录
     :param request:
     :return:
-    """
+    '''
     phone_num = request.POST.get('phone_num', '')
     code = request.POST.get('code', '')
 
@@ -49,34 +58,34 @@ def login(request):
     #     user = User.objects.create(phonenum=phone)
     #     # 创建用户的同时，使用 user.id 创建 Profile 对象，建立一对一的关联
     #     Profile.objects.create(id=user.id)
-
+    
     user, created = User.objects.get_or_create(phonenum=phone_num)
     request.session['uid'] = user.id
+
+    logger.info('user.login, uid:%s' % user.id)
 
     return render_json(data=user.to_dict())
 
 
 def get_profile(request):
-    """
-    获取用户信息
+    '''
+    获取用户
     :param request:
     :return:
-    """
+    '''
     profile = request.user.profile
     return render_json(data=profile.to_dict(exclude=['vibration', 'only_matche', 'auto_play']))
 
 
-
 def set_profile(request):
-    """
+    '''
     设置用户信息
     :param request:
     :return:
-    """
+    '''
+
     user = request.user
-
     form = ProfileForm(request.POST, instance=user.profile)
-
     if form.is_valid():
         form.save()
         return render_json()
@@ -85,11 +94,12 @@ def set_profile(request):
 
 
 def upload_avatar(request):
-    """
+    '''
     更新用户信息
     :param request:
     :return:
-    """
+    '''
+
     avatar = request.FILES.get('avatar')
     user = request.user
 
@@ -99,7 +109,6 @@ def upload_avatar(request):
     # with open(filepath, 'wb+') as output:
     #     for chunk in avatar.chunks():
     #         output.write(chunk)
-
     ret = logic.async_upload_avatar(user, avatar)
 
     if ret:

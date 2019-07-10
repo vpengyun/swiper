@@ -1,24 +1,24 @@
 import datetime
 
 from django.db import models
-
-# Create your models here.
 from django.utils.functional import cached_property
 
 from libs.orm import ModelToDictMixin
+from vip.models import Vip
 
 
 class User(models.Model):
-    '''
-    phonenum 手机号
-    nickname 昵称
-    sex      性别
-    birth_year 出生年
-    brith_month出生月
-    birth_day  出生日
-    avatar     个人形象
-    location   长居地
-    '''
+    """
+    phonenum	手机号
+    nickname	昵称
+    sex	性别
+    birth_year	出生年
+    birth_month	出生月
+    birth_day	出生日
+    avatar	个人形象
+    location	常居地
+    """
+
     LOCATIONS = (
         ('bj', '北京'),
         ('sz', '深圳'),
@@ -42,10 +42,15 @@ class User(models.Model):
     birth_day = models.IntegerField(default=1)
     avatar = models.CharField(max_length=256)
     location = models.CharField(max_length=64, choices=LOCATIONS)
+    vip_id = models.IntegerField(default=1)
 
     # @property
     @cached_property
     def age(self):
+        '''
+        获取用户年龄
+        :return:
+        '''
         today = datetime.date.today()
         birthday = datetime.date(self.birth_year, self.birth_month, self.birth_day)
 
@@ -55,6 +60,7 @@ class User(models.Model):
     def profile(self):
         """
         user.profile.location
+        返回用户，用户不存在则创建
         :return:
         """
         if not hasattr(self, '_profile'):
@@ -66,6 +72,17 @@ class User(models.Model):
             #     self._profile = Profile.objects.create(id=self.id)
 
         return self._profile
+
+    @property
+    def vip(self):
+        """
+        返回用户 vip 信息
+        :return:
+        """
+        if not hasattr(self, '_vip'):
+            self._vip = Vip.objects.get(id=self.vip_id)
+
+        return self._vip
 
     def to_dict(self):
         return {
@@ -81,7 +98,8 @@ class User(models.Model):
     class Meta:
         db_table = 'users'
 
-class Profile(models.Model,ModelToDictMixin):
+
+class Profile(models.Model, ModelToDictMixin):
     """
     | location       | 目标城市                 |
     | min_distance   | 最小查找范围             |
@@ -96,6 +114,7 @@ class Profile(models.Model,ModelToDictMixin):
     user.profile.location
 
     """
+
     LOCATIONS = (
         ('bj', '北京'),
         ('sz', '深圳'),
@@ -112,15 +131,11 @@ class Profile(models.Model,ModelToDictMixin):
     )
 
     location = models.CharField(max_length=64, choices=LOCATIONS)
-
     min_distance = models.IntegerField(default=1)
     max_distance = models.IntegerField(default=10)
-
     min_dating_age = models.IntegerField(default=18)
     max_dating_age = models.IntegerField(default=81)
-
     dating_sex = models.IntegerField(default=0, choices=SEXS)
-
     vibration = models.BooleanField(default=True)
     only_matche = models.BooleanField(default=True)
     auto_play = models.BooleanField(default=True)
