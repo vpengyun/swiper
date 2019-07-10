@@ -4,9 +4,15 @@
 # 缓存 key prefix
 VERIFY_CODE_CACHE_PREFIX = 'verfiy_code:%s'
 REWIND_CACHE_PREFIX = 'rewind:%s'
-
+MODEL_CACHE_PREFIX = 'model:%s:%s'
+HOT_RANK_KEY = 'hot_rank'
 # 社交模块配置
 REWIND_TIMES = 3
+SWIPE_SCORES = {
+    'like': 5,
+    'superlike': 8,
+    'dislike': 0
+}
 
 # 云之讯短信平台配置
 YZX_SMS_URL = 'https://open.ucpaas.com/ol/sms/sendsms'

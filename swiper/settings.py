@@ -37,9 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'social',
-    'user',
-    'vip'
+    'social.apps.SocialConfig',
+    'user.apps.UserConfig',
+    'vip.apps.VipConfig'
 ]
 
 MIDDLEWARE = [
@@ -81,6 +81,27 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+}
+# 缓存配置
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # "PASSWORD": "mysecret",
+            "PICKLE_VERSION": -1,
+            "SOCKET_CONNECT_TIMEOUT": 5,  # 连接超时时间
+            "SOCKET_TIMEOUT": 5,  # 获取数据超时时间
+        }
+    }
+}
+
+
+REDIS = {
+    'host': 'localhost',
+    'port': 6379,
+    'db': 2
 }
 
 

@@ -6,6 +6,12 @@ from common import config
 
 # class ModelToDictMixin(object):
 def to_dict(self, exclude=[]):
+    '''
+    将对象的数据转成字典类型
+    :param self:
+    :param exclude:
+    :return:
+    '''
     attr_dict = {}
 
     for field in self._meta.fields:
@@ -105,5 +111,4 @@ def path_model():
 
     models.Model._save = models.Model.save
     models.Model.save = save
-
     models.Model.to_dict = to_dict
