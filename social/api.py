@@ -65,6 +65,7 @@ def dislike(request):
 
     return render_json()
 
+
 @has_perm('rewind')
 def rewind(request):
     '''
@@ -76,6 +77,7 @@ def rewind(request):
     logic.rewind(user)
 
     return render_json()
+
 
 @has_perm('liked_me')
 def liked_me(request):

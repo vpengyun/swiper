@@ -3,7 +3,6 @@ import datetime
 from django.db import models
 from django.utils.functional import cached_property
 
-from libs.orm import ModelToDictMixin
 from vip.models import Vip
 
 
@@ -99,7 +98,7 @@ class User(models.Model):
         db_table = 'users'
 
 
-class Profile(models.Model, ModelToDictMixin):
+class Profile(models.Model):
     """
     | location       | 目标城市                 |
     | min_distance   | 最小查找范围             |
